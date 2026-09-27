@@ -1,6 +1,6 @@
-# LogicBuilder.Samples.Contoso.Infrastructure
+# LogicBuilder.Samples.Enrollment.Infrastructure
 
-This repository contains the Infrastructure as Code (IaC) for deploying a multi-tier Azure Container Apps environment for the Contoso sample application.
+This repository contains the Infrastructure as Code (IaC) for deploying a multi-tier Azure Container Apps environment for the Enrollment sample application.
 
 ## Overview
 
@@ -12,12 +12,12 @@ The infrastructure is defined using Azure Bicep and provisions a complete micros
 
 The deployment includes six container applications:
 
-1. **Angular Frontend** (`contoso-angular`) - A client-side web application that serves as the user interface
-2. **Workflow Service** (`contoso-workflow`) - A workflow orchestration service
-3. **API Service** (`contoso-api`) - A front-end API that communicates with the BSL backend
-4. **Kendo API Service** (`contoso-kendo-api`) - A front-end API for Kendo UI components that communicates with the Kendo BSL backend
-5. **BSL Service** (`contoso-bsl`) - An internal back-end business service layer
-6. **Kendo BSL Service** (`contoso-kendo-bsl`) - An internal back-end business service layer for Kendo operations
+1. **Angular Frontend** (`enroll-angular`) - A client-side web application that serves as the user interface
+2. **Workflow Service** (`enroll-workflow`) - A workflow orchestration service
+3. **API Service** (`enroll-api`) - A front-end API that communicates with the BSL backend
+4. **Kendo API Service** (`enroll-kendo-api`) - A front-end API for Kendo UI components that communicates with the Kendo BSL backend
+5. **BSL Service** (`enroll-bsl`) - An internal back-end business service layer
+6. **Kendo BSL Service** (`enroll-kendo-bsl`) - An internal back-end business service layer for Kendo operations
 
 ### Communication Flow
 
@@ -53,7 +53,7 @@ The deployment includes six container applications:
 - `memorySize` - Memory allocation per container (0.5-4 GiB, default: 1)
 - `minReplicas` - Minimum replica count (0-25, default: 1)
 - `maxReplicas` - Maximum replica count (0-25, default: 3)
-- `prefix` - Naming prefix for resources (default: 'contoso')
+- `prefix` - Naming prefix for resources (default: 'enroll')
 - `placeholderImage` - Initial placeholder image for deployment (default: mcr.microsoft.com/azuredocs/aci-helloworld:latest)
 - `targetPort` - Container target port (default: 8080)
 
@@ -81,4 +81,4 @@ All containers initially use a public placeholder image. After deployment, you c
 
 ## Related Repositories
 
-This infrastructure repository is designed to support the LogicBuilder.Samples.Contoso application.
+This infrastructure repository is designed to support the LogicBuilder.Samples.Enrollment application.

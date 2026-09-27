@@ -23,7 +23,8 @@ jobs:
     - name: Deploy Infrastructure
       uses: azure/arm-deploy@v1
       with:
+        scope: resourcegroup
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-        resourceGroupName: ${{ secrets.AZURE_RG_CONTOSO }}
+        resourceGroupName: ${{ secrets.AZURE_RG_ENROLLMENT }}
         template: ./applications/main.bicep
         failOnStdErr: false

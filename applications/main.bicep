@@ -38,7 +38,7 @@ param minReplicas int = 1
 param maxReplicas int = 3
 
 @description('The naming prefix for all resources.')
-param prefix string = 'contoso'
+param prefix string = 'enroll'
 
 @description('Specifies the docker container image to deploy.')
 param placeholderImage string = 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
@@ -55,7 +55,7 @@ var containerAppEnvName = '${prefix}-cae-${uniqueSubString}'
 var appConfigurationName = '${prefix}-config-${uniqueSubString}'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
-  name: 'contoso-kv-${uniqueString(resourceGroup().id)}'
+  name: 'enroll-kv-${uniqueString(resourceGroup().id)}'
   dependsOn: [createKeyVaultAndCertificate]
 }
 
@@ -590,5 +590,5 @@ output acrLoginServer string = acr.properties.loginServer
 output acrName string = acr.name
 output appConfigurationEndPoint string = appConfiguration.properties.endpoint
 output keyVaultName string = keyVault.name
-output contosoBslCertificateThumbprint string = createKeyVaultAndCertificate.outputs.certificateThumbprint
-output contosoBslCertificateName string = createKeyVaultAndCertificate.outputs.certificateName
+output enrollBslCertificateThumbprint string = createKeyVaultAndCertificate.outputs.certificateThumbprint
+output enrollBslCertificateName string = createKeyVaultAndCertificate.outputs.certificateName

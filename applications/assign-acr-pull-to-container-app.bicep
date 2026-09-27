@@ -5,7 +5,7 @@ param acrPullRoleDefinitionID string = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 param containerAppName string
 
 @description('The naming prefix for all resources.')
-param prefix string = 'contoso'
+param prefix string = 'enroll'
 
 @description('Generate a unique GUID to use as name for the role assignment')
 var containerAppToAcrRoleAssignmentName = guid(containerApp.id, acrPullRoleDefinitionID, acr.id)
