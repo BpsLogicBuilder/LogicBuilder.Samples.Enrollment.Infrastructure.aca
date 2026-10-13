@@ -54,6 +54,21 @@ var appInsightsName = '${prefix}-insights-${uniqueSubString}'
 var containerAppEnvName = '${prefix}-cae-${uniqueSubString}'
 var appConfigurationName = '${prefix}-config-${uniqueSubString}'
 
+var foundryResourceGroupName = 'rg-foundry-iq'
+var foundrySuffix = uniqueString(subscription().subscriptionId, foundryResourceGroup.id)
+var foundryAccountResourceName = 'bps-foundry-iq-${foundrySuffix}'
+var foundryUserRoleDefinitionID string = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
+
+resource foundryAccountResource 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
+  name: foundryAccountResourceName
+  scope: resourceGroup(foundryResourceGroupName)
+}
+
+resource foundryResourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' existing = {
+  name: foundryResourceGroupName
+  scope: subscription()
+}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: 'enroll-kv-${uniqueString(resourceGroup().id)}'
   dependsOn: [createKeyVaultAndCertificate]
@@ -348,6 +363,75 @@ resource kendoApiService 'Microsoft.App/containerApps@2026-01-01' = {
   }
 }
 
+resource chatHubService 'Microsoft.App/containerApps@2026-01-01' = {
+  name: '${prefix}-chat-hub-${uniqueSubString}'
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    managedEnvironmentId: containerAppEnv.id
+    configuration: {
+      ingress: {
+        external: true
+        targetPort: targetPort
+        transport: 'auto'
+        allowInsecure: false
+        traffic: [
+          {
+            latestRevision: true
+            weight: 100
+          }
+        ]
+        corsPolicy: {
+          allowedOrigins: [
+            'https://${prefix}-angular-${uniqueSubString}.azurewebsites.net'
+          ]
+          allowedMethods: [
+            'GET'
+            'POST'
+            'PUT'
+            'DELETE'
+          ]
+          allowedHeaders: [
+            'Content-Type'
+            'Authorization"'
+            'X-Requested-With'
+            'X-Signalr-User-Agent'
+          ]
+          exposeHeaders: [
+            '*'
+          ]
+          maxAge: 300
+          allowCredentials: true
+        }
+      }
+    }
+    template: {
+      containers: [
+        {
+          name: 'chat-hub'
+          image: placeholderImage
+          resources: {
+            cpu: json(cpuCore)
+            memory: '${memorySize}Gi'
+          }
+          env: [
+            {
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              value: appInsights.properties.ConnectionString
+            }
+            {
+              name: 'APPLICATION_CONFIGURATION_ENDPOINT'
+              value: appConfiguration.properties.endpoint
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
 resource workflowService 'Microsoft.App/containerApps@2026-01-01' = {
   name: '${prefix}-workflow-${uniqueSubString}'
   location: location
@@ -456,6 +540,10 @@ resource angularApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: 'https://${kendoApiService.properties.configuration.ingress.fqdn}'
             }
             {
+              name: 'CHATHUB_URL'
+              value: 'https://${chatHubService.properties.configuration.ingress.fqdn}'
+            }
+            {
               name: 'WORKFLOW_URL'
               value: 'https://${workflowService.properties.configuration.ingress.fqdn}'
             }
@@ -499,6 +587,13 @@ module kendoApiServiceToAcrRoleAssignment './assign-acr-pull-to-container-app.bi
   name: 'kendoApiServiceToAcrRoleAssignment'
   params: {
     containerAppName: kendoApiService.name
+  }
+}
+
+module chatHubServiceToAcrRoleAssignment './assign-acr-pull-to-container-app.bicep' = {
+  name: 'chatHubServiceToAcrRoleAssignment'
+  params: {
+    containerAppName: chatHubService.name
   }
 }
 
@@ -566,6 +661,14 @@ module kendoApiServiceToAppConfigRoleAssignment './assign-app-config-data-reader
   }
 }
 
+module chatHubServiceToAppConfigRoleAssignment './assign-app-config-data-reader-role-to-container-app.bicep' = {
+  name: 'chatHubServiceToAppConfigRoleAssignment'
+  params: {
+    containerAppName: chatHubService.name
+    appConfigName: appConfiguration.name
+  }
+}
+
 module workflowServiceToAppConfigRoleAssignment './assign-app-config-data-reader-role-to-container-app.bicep' = {
   name: 'workflowServiceToAppConfigRoleAssignment'
   params: {
@@ -579,6 +682,16 @@ module angularServiceToAppConfigRoleAssignment './assign-app-config-data-reader-
   params: {
     containerAppName: angularApp.name
     appConfigName: appConfiguration.name
+  }
+}
+
+module chatHubServiceToFoundryRoleAssignment './assign-foundry-user-access-to-container-app.bicep' = {
+  name: 'chatHubServiceToFoundryRoleAssignment'
+  scope: resourceGroup(foundryResourceGroupName)
+  params: {
+    foundryAccountResourceName: foundryAccountResource.name
+    containerAppPrincipalId: chatHubService.identity.principalId
+    containerAppToFoundryRoleAssignmentName: guid(chatHubService.id, foundryUserRoleDefinitionID, foundryAccountResource.id)
   }
 }
 
