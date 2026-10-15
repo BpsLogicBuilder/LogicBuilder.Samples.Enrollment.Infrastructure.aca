@@ -1,3 +1,4 @@
+* 2026-10-15 - AB#247: Kick of service deployments after infrastructure.
 * 2026-10-13 - AB#242: Add ChatHub to initial deployment.
 * 2026-09-27 - AB#211: Replace Contoso references with Enrollment.
 * 2026-09-27 - Add project files.
